@@ -51,10 +51,11 @@ def read():
     outFile = open(args.outputFile,'w')
     readedBytes=0;
     maxNoDataTime=5 #[s]
+    readStartTime=time.time()
     lastDataTime=time.time()
     semaphoreStartSynchro.release()
     while ((readedBytes != inputSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
-        data = portHandle.read(100);
+        data = portHandle.read(256);
         if len(data) > 0:
             outFile.write(data)
             readedBytes+=len(data)
@@ -63,6 +64,7 @@ def read():
         else:
             print "No data time",(time.time() - lastDataTime),"s."
     outFile.close()
+    print "Whole read transfer time:",(time.time()-readStartTime),"s."
 
 # Writing thread
 def main():
