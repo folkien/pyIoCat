@@ -36,7 +36,8 @@ portHandle = serial.Serial(
     baudrate=115200,
     parity=serial.PARITY_EVEN,
     stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS
+    bytesize=serial.EIGHTBITS,
+    timeout=1
 )
 if portHandle.isOpen(): 
     portHandle.close()
@@ -45,22 +46,27 @@ print "Port ",args.device," opened."
 
 # Reading thread
 def read():
-    print "Output to ",args.outputFile
-    readedBytes=0;
-    # Open write file and send lines 
+    print "Output to ",args.outputFile,"."
     outFile = open(args.outputFile,'w')
+    readedBytes=0;
+    maxNoDataTime=5 #[s]
+    lastDataTime=time.time()
     semaphoreStartSynchro.release()
-    while (readedBytes != inputSize):
+    while ((readedBytes != inputSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
         data = portHandle.read(100);
         if len(data) > 0:
             outFile.write(data)
             readedBytes+=len(data)
-            print "Readed ",readedBytes,"/",inputSize
+            lastDataTime=time.time()
+            print "Readed ",readedBytes,"/",inputSize,"."
+        else:
+            print "No data time",(time.time() - lastDataTime),"s."
     outFile.close()
 
 # Writing thread
 def main():
     # Read thread creation
+    semaphoreStartSynchro.acquire()
     tRead = threading.Thread(target=read, args=())
     tRead.start()
 
@@ -68,7 +74,7 @@ def main():
     semaphoreStartSynchro.acquire()
 
     # Open write file and send lines 
-    print "Input from ",args.inputFile
+    print "Input from ",args.inputFile,"."
     print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
     for line in inFile:
