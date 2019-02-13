@@ -1,1 +1,1 @@
-sudo ln -sf /usr/bin/serialCat ./serialCat.py
+sudo ln -sf $(pwd)/serialCat.py /usr/bin/serialCat
