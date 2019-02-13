@@ -8,6 +8,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--inputFile", type=str, required=True, help="input file")
 parser.add_argument("-o", "--outputFile", type=str, required=True, help="output file")
 parser.add_argument("-d", "--device", type=str, required=True, help="tty Device")
+parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
+parser.add_argument("-P", "--parity", type=str, required=False, help="")
 args = parser.parse_args()
 
 #Assert
@@ -25,6 +27,23 @@ if (not args.device):
     print "No device"
     sys.exit(1)
 
+#Config check
+if (not args.baudrate):
+    defaultBaudrate=115200
+else:
+    defaultBaudrate=args.baudrate
+
+#Config check
+if (not args.parity):
+    defaultParity=serial.PARITY_EVEN
+else:
+    if args.parity == "even":
+        defaultParity=serial.PARITY_EVEN
+    elif args.parity == "odd":
+        defaultParity=serial.PARITY_ODD
+    else:
+        defaultParity=serial.PARITY_NONE
+
 semaphoreStartSynchro = threading.Semaphore()
 
 # Read input file size
@@ -33,9 +52,9 @@ inputSize = os.stat(args.inputFile).st_size
 # Serial port read
 portHandle = serial.Serial(
     port=args.device,
-    baudrate=115200,
+    baudrate=defaultBaudrate,
     rtscts=True,
-    parity=serial.PARITY_EVEN,
+    parity=defaultParity,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
     timeout=1
