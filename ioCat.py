@@ -25,10 +25,8 @@ if (not args.device):
     print "No device"
     sys.exit(1)
 
-sys.exit(1)
 # Read input file size
 inputSize = os.stat(args.inputFile).st_size
-print "InputSize : ",inputSize,"Bytes."
 
 # Serial port read
 portHandle = serial.Serial(
@@ -38,9 +36,13 @@ portHandle = serial.Serial(
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS
 )
+if portHandle.isOpen(): 
+    portHandle.close()
+portHandle.open()
 
 # Reading thread
 def read():
+    print "Output to ",args.outputFile
     readedBytes=0;
     # Open write file and send lines 
     outFile = open(args.outputFile,'w')
@@ -53,12 +55,20 @@ def read():
 
 # Writing thread
 def main():
-    if portHandle.isOpen(): portHandle.close()
-    portHandle.open()
     # Read thread creation
-    t1 = threading.Thread(target=read, args=())
+    tRead = threading.Thread(target=read, args=())
+    tRead.start()
+
     # Open write file and send lines 
+    print "Input from ",args.inputFile
+    print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
     for line in inFile:
         portHandle.write(line)
+
+    # Wait on reading thread and close port
+    tRead.join()
     portHandle.close()
+
+# Call main
+main()
