@@ -34,6 +34,7 @@ inputSize = os.stat(args.inputFile).st_size
 portHandle = serial.Serial(
     port=args.device,
     baudrate=115200,
+    rtscts=True,
     parity=serial.PARITY_EVEN,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
