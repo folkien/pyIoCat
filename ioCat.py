@@ -25,6 +25,8 @@ if (not args.device):
     print "No device"
     sys.exit(1)
 
+semaphoreStartSynchro = threading.Semaphore()
+
 # Read input file size
 inputSize = os.stat(args.inputFile).st_size
 
@@ -39,6 +41,7 @@ portHandle = serial.Serial(
 if portHandle.isOpen(): 
     portHandle.close()
 portHandle.open()
+print "Port ",args.device," opened."
 
 # Reading thread
 def read():
@@ -46,11 +49,13 @@ def read():
     readedBytes=0;
     # Open write file and send lines 
     outFile = open(args.outputFile,'w')
+    semaphoreStartSynchro.release()
     while (readedBytes != inputSize):
-        data = portHandle.read(1000);
+        data = portHandle.read(100);
         if len(data) > 0:
             outFile.write(data)
             readedBytes+=len(data)
+            print "Readed ",readedBytes,"/",inputSize
     outFile.close()
 
 # Writing thread
@@ -58,6 +63,9 @@ def main():
     # Read thread creation
     tRead = threading.Thread(target=read, args=())
     tRead.start()
+
+    # Wait on start synchronization semaphore
+    semaphoreStartSynchro.acquire()
 
     # Open write file and send lines 
     print "Input from ",args.inputFile
@@ -68,6 +76,7 @@ def main():
 
     # Wait on reading thread and close port
     tRead.join()
+    print "Port ",args.device," closed."
     portHandle.close()
 
 # Call main
