@@ -79,11 +79,12 @@ def read():
             outFile.write(data)
             readedBytes+=len(data)
             lastDataTime=time.time()
-            print "Readed ",readedBytes,"/",inputSize,"."
+            sys.stdout.write("\rReaded %d/%dB." % (readedBytes,inputSize))
+            sys.stdout.flush()
         else:
-            print "No data time",(time.time() - lastDataTime),"s."
+            print "\nNo data time",(time.time() - lastDataTime),"s."
     outFile.close()
-    print "Whole read transfer time:",(time.time()-readStartTime),"s."
+    print "\nWhole read transfer time:",(time.time()-readStartTime),"s."
 
 # Writing thread
 def main():
