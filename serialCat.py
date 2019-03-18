@@ -57,12 +57,17 @@ portHandle = serial.Serial(
     parity=defaultParity,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
-    timeout=1
+    timeout=1,
+    write_timeout=3
 )
-if portHandle.isOpen(): 
+if portHandle.isOpen():
     portHandle.close()
 portHandle.open()
 print "Port ",args.device," opened."
+
+# Variable with state of Rx Thread
+global RxThreadRunning
+RxThreadRunning=0
 
 # Reading thread
 def read():
@@ -72,6 +77,7 @@ def read():
     maxNoDataTime=5 #[s]
     readStartTime=time.time()
     lastDataTime=time.time()
+    RxThreadRunning=1
     semaphoreStartSynchro.release()
     while ((readedBytes != inputSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
         data = portHandle.read(256);
@@ -85,6 +91,7 @@ def read():
             print "\nNo data time",(time.time() - lastDataTime),"s."
     outFile.close()
     print "\nWhole read transfer time:",(time.time()-readStartTime),"s."
+    RxThreadRunning=0
 
 # Writing thread
 def main():
@@ -96,12 +103,19 @@ def main():
     # Wait on start synchronization semaphore
     semaphoreStartSynchro.acquire()
 
-    # Open write file and send lines 
+    # Open write file and send lines
     print "Input from ",args.inputFile,"."
     print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
     for line in inFile:
-        portHandle.write(line)
+        try:
+            portHandle.write(line)
+        except portHandle.SerialTimeoutException as e:
+            print "Write Timeout!"
+            break;
+        if (RxThreadRunning == 0):
+            break;
+
 
     # Wait on reading thread and close port
     tRead.join()
