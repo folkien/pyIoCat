@@ -108,11 +108,7 @@ def main():
     print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
     for line in inFile:
-        try:
-            portHandle.write(line)
-        except portHandle.SerialTimeoutException as e:
-            print "Write Timeout!"
-            break;
+        portHandle.write(line)
         if (RxThreadRunning == 0):
             break;
 
