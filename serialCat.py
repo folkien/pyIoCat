@@ -90,8 +90,9 @@ def read():
         else:
             print "\nNo data time",(time.time() - lastDataTime),"s."
     outFile.close()
-    print "\nWhole read transfer time:",(time.time()-readStartTime),"s."
+    print "\nWhole read transfer time:",str(round((time.time()-readStartTime),2)),"s."
     RxThreadRunning=0
+    print "Transfer speed ",str(round((readedBytes/(time.time()-readStartTime))/1024,2)),"kB/s."
 
 # Writing thread
 def main():
