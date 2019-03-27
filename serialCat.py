@@ -68,6 +68,8 @@ print "Port ",args.device," opened."
 # Variable with state of Rx Thread
 global RxThreadRunning
 RxThreadRunning=0
+global TxTransmitted
+TxTransmitted=0
 
 # Reading thread
 def read():
@@ -81,12 +83,12 @@ def read():
     semaphoreStartSynchro.release()
     while ((readedBytes != inputSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
         data = portHandle.read(256);
+        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB." % (TxTransmitted,inputSize,readedBytes,inputSize))
+        sys.stdout.flush()
         if len(data) > 0:
             outFile.write(data)
             readedBytes+=len(data)
             lastDataTime=time.time()
-            sys.stdout.write("\rReaded %d/%dB." % (readedBytes,inputSize))
-            sys.stdout.flush()
         else:
             print "\nNo data time",(time.time() - lastDataTime),"s."
     outFile.close()
@@ -96,6 +98,7 @@ def read():
 
 # Writing thread
 def main():
+    TxTransmitted = 0;
     # Read thread creation
     semaphoreStartSynchro.acquire()
     tRead = threading.Thread(target=read, args=())
@@ -109,7 +112,8 @@ def main():
     print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
     for line in inFile:
-        portHandle.write(line)
+        writeSize       = portHandle.write(line)
+        TxTransmitted   += writeSize
         if (RxThreadRunning == 0):
             break;
 
