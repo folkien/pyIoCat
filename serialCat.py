@@ -66,13 +66,13 @@ portHandle.open()
 print "Port ",args.device," opened."
 
 # Variable with state of Rx Thread
-global RxThreadRunning
 RxThreadRunning=0
-global TxTransmitted
 TxTransmitted=0
 
 # Reading thread
 def read():
+    global RxThreadRunning
+    global TxTransmitted
     print "Output to ",args.outputFile,"."
     outFile = open(args.outputFile,'w')
     readedBytes=0;
@@ -91,14 +91,17 @@ def read():
             lastDataTime=time.time()
         else:
             print "\nNo data time",(time.time() - lastDataTime),"s."
+
     outFile.close()
+    sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB." % (TxTransmitted,inputSize,readedBytes,inputSize))
     print "\nWhole read transfer time:",str(round((time.time()-readStartTime),2)),"s."
     RxThreadRunning=0
     print "Transfer speed ",str(round((readedBytes/(time.time()-readStartTime))/1024,2)),"kB/s."
 
 # Writing thread
 def main():
-    TxTransmitted = 0;
+    global RxThreadRunning
+    global TxTransmitted
     # Read thread creation
     semaphoreStartSynchro.acquire()
     tRead = threading.Thread(target=read, args=())
