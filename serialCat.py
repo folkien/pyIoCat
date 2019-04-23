@@ -83,7 +83,7 @@ def read():
     semaphoreStartSynchro.release()
     while ((readedBytes != inputSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
         data = portHandle.read(256);
-        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB." % (TxTransmitted,inputSize,readedBytes,inputSize))
+        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,inputSize,TxTransmitted-readedBytes))
         sys.stdout.flush()
         if len(data) > 0:
             outFile.write(data)
@@ -92,11 +92,16 @@ def read():
         else:
             print "\nNo data time",(time.time() - lastDataTime),"s."
 
+    stopTime=time.time()
+    durationTime=stopTime-readStartTime
     outFile.close()
-    sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB." % (TxTransmitted,inputSize,readedBytes,inputSize))
-    print "\nWhole read transfer time:",str(round((time.time()-readStartTime),2)),"s."
+    sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,inputSize,TxTransmitted-readedBytes))
+    if (durationTime>60):
+        print "\nWhole read transfer time:",str(round(durationTime/60,0)),"m ",str(round(fmod(durationTime,60),2)),"s."
+    else:
+        print "\nWhole read transfer time:",str(round(durationTime,2)),"s."
+    print "Transfer speed:",str(round((readedBytes/durationTime)/1024,2)),"kB/s."
     RxThreadRunning=0
-    print "Transfer speed ",str(round((readedBytes/(time.time()-readStartTime))/1024,2)),"kB/s."
 
 # Writing thread
 def main():
