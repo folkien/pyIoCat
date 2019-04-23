@@ -3,6 +3,7 @@ import argparse, os, sys
 import threading
 import time
 import serial
+import math
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--inputFile", type=str, required=True, help="input file")
@@ -97,10 +98,11 @@ def read():
     outFile.close()
     sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,inputSize,TxTransmitted-readedBytes))
     if (durationTime>60):
-        print "\nWhole read transfer time:",str(round(durationTime/60,0)),"m ",str(round(fmod(durationTime,60),2)),"s."
+        print "\nWhole read transfer time:",str(round(durationTime/60,0)),"m ",str(round(math.fmod(durationTime,60),2)),"s."
     else:
         print "\nWhole read transfer time:",str(round(durationTime,2)),"s."
     print "Transfer speed:",str(round((readedBytes/durationTime)/1024,2)),"kB/s."
+    print "Baudrate theoreticaly transfer speed:",str(round((defaultBaudrate/11)/1024, 2)),"kB/s."
     RxThreadRunning=0
 
 # Writing thread
