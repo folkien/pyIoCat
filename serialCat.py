@@ -11,6 +11,7 @@ parser.add_argument("-o", "--outputFile", type=str, required=True, help="output 
 parser.add_argument("-d", "--device", type=str, required=True, help="tty Device")
 parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
 parser.add_argument("-P", "--parity", type=str, required=False, help="")
+parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
 args = parser.parse_args()
 
 #Assert
@@ -45,6 +46,13 @@ else:
     else:
         defaultParity=serial.PARITY_NONE
 
+#Config check
+if (args.graph):
+    import matplotlib.pyplot as plt
+    plot_time = []
+    plot_RxData = []
+    plot_TxData = []
+
 semaphoreStartSynchro = threading.Semaphore()
 
 # Read input file size
@@ -74,6 +82,11 @@ TxTransmitted=0
 def read():
     global RxThreadRunning
     global TxTransmitted
+    #Declare globals for plot
+    if (args.graph):
+        global plot_time
+        global plot_RxData
+        global plot_TxData
     print "Output to ",args.outputFile,"."
     outFile = open(args.outputFile,'w')
     readedBytes=0;
@@ -84,6 +97,13 @@ def read():
     semaphoreStartSynchro.release()
     while ((readedBytes != inputSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
         data = portHandle.read(256);
+        # Store data for graphical plot.
+        if (args.graph):
+            timeStamp=time.time()
+            plot_time.append(timeStamp)
+            plot_RxData.append(readedBytes)
+            plot_TxData.append(TxTransmitted)
+        # Print trace info
         sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,inputSize,TxTransmitted-readedBytes))
         sys.stdout.flush()
         if len(data) > 0:
@@ -132,6 +152,12 @@ def main():
     tRead.join()
     print "Port ",args.device," closed."
     portHandle.close()
+
+    #Plot graph if needed
+    if (args.graph):
+        plt.plot(plot_time,plot_TxData,label="TxData")
+        plt.plot(plot_time,plot_RxData,label="RxData")
+        plt.show()
 
 # Call main
 main()
