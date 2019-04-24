@@ -7,7 +7,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
-sudo apt install python
-sudo apt install python-pip
+sudo apt install -yf python
+sudo apt install -yf python-pip
+sudo apt install -yf python-matplotlib
 pip2 install pyserial
 sudo ln -sf ${DIR}/serialCat.py /usr/bin/serialCat
