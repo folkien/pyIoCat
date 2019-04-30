@@ -67,7 +67,7 @@ portHandle = serial.Serial(
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
     timeout=1,
-    write_timeout=3
+    write_timeout=10
 )
 if portHandle.isOpen():
     portHandle.close()
