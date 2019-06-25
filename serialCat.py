@@ -11,6 +11,7 @@ parser.add_argument("-o", "--outputFile", type=str, required=True, help="output 
 parser.add_argument("-d", "--device", type=str, required=True, help="tty Device")
 parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
 parser.add_argument("-P", "--parity", type=str, required=False, help="")
+parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size of transmited frame")
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
 args = parser.parse_args()
 
@@ -45,6 +46,12 @@ else:
         defaultParity=serial.PARITY_ODD
     else:
         defaultParity=serial.PARITY_NONE
+
+#Config check
+if (not args.transmitSize):
+    defaultTransmitSize=1024
+else:
+    defaultTransmitSize=args.transmitSize
 
 #Config check
 if (args.graph):
@@ -142,7 +149,8 @@ def main():
     print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
     for line in inFile:
-        writeSize       = portHandle.write(line)
+        lineSize        = len(line)
+        writeSize       = portHandle.write(line[:min(lineSize,defaultTransmitSize)])
         TxTransmitted   += writeSize
         if (RxThreadRunning == 0):
             break;
