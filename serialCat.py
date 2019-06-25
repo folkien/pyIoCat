@@ -148,9 +148,8 @@ def main():
     print "Input from ",args.inputFile,"."
     print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
-    for line in inFile:
-        lineSize        = len(line)
-        writeSize       = portHandle.write(line[:min(lineSize,defaultTransmitSize)])
+    for chunk in iter(lambda: inFile.read(defaultTransmitSize), ''):
+        writeSize       = portHandle.write(chunk)
         TxTransmitted   += writeSize
         if (RxThreadRunning == 0):
             break;
