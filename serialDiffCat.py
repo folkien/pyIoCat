@@ -95,6 +95,7 @@ def main():
     print "Input size : ",inputSize,"Bytes."
     print "Chunk size : ",defaultTransmitSize,"."
     inFile = open(args.inputFile,'r')
+    startTime=time.time()
     # Inifinite loop through file
     while (isError == 0) :
         for chunk in iter(lambda: inFile.read(defaultTransmitSize), ''):
@@ -112,8 +113,9 @@ def main():
                 break;
 
             TxTransmitted   += writeSize
+            durationTime=time.time()-startTime
             # Print trace info
-            sys.stdout.write("\rTransmitted %dB" % (TxTransmitted))
+            sys.stdout.write("\rTransmitted %dB. Transfer speed %02.02f kB/s." % (TxTransmitted, round((TxTransmitted/durationTime)/1024,2)))
             sys.stdout.flush()
         inFile.seek(0)
 
