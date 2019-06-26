@@ -98,11 +98,14 @@ def main():
     startTime=time.time()
     # Inifinite loop through file
     while (isError == 0) :
+        outFile = open(args.outputFile,'w')
         for chunk in iter(lambda: inFile.read(defaultTransmitSize), ''):
             writeSize       = portHandle.write(chunk)
             readedChunk     = portHandle.read(defaultTransmitSize);
             # Check data was read
-            if len(readedChunk) == 0:
+            if len(readedChunk) > 0:
+                outFile.write(readedChunk)
+            else:
                 isError = 1
                 print "Timeout error!"
                 break;
@@ -118,8 +121,9 @@ def main():
             sys.stdout.write("\rTransmitted %dB. Transfer speed %02.02f kB/s." % (TxTransmitted, round((TxTransmitted/durationTime)/1024,2)))
             sys.stdout.flush()
         inFile.seek(0)
+        outFile.close()
 
-
+    inFile.close()
     print "Port ",args.device," closed."
     portHandle.close()
 
