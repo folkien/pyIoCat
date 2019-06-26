@@ -12,3 +12,4 @@ sudo apt install -yf python-pip
 sudo apt install -yf python-matplotlib
 pip2 install pyserial
 sudo ln -sf ${DIR}/serialCat.py /usr/bin/serialCat
+sudo ln -sf ${DIR}/serialDiffCat.py /usr/bin/serialDiffCat
