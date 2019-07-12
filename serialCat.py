@@ -12,6 +12,7 @@ parser.add_argument("-d", "--device", type=str, required=True, help="tty Device"
 parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
 parser.add_argument("-P", "--parity", type=str, required=False, help="")
 parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size of transmited frame")
+parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received frame")
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
 args = parser.parse_args()
 
@@ -60,10 +61,16 @@ if (args.graph):
     plot_RxData = []
     plot_TxData = []
 
-semaphoreStartSynchro = threading.Semaphore()
-
 # Read input file size
 inputSize = os.stat(args.inputFile).st_size
+
+#Config check
+if (not args.receiveSize):
+    receiveSize=inputSize
+else:
+    receiveSize=args.receiveSize
+
+semaphoreStartSynchro = threading.Semaphore()
 
 # Serial port read
 portHandle = serial.Serial(
@@ -89,6 +96,7 @@ TxTransmitted=0
 def read():
     global RxThreadRunning
     global TxTransmitted
+    global receiveSize
     #Declare globals for plot
     if (args.graph):
         global plot_time
@@ -102,7 +110,7 @@ def read():
     lastDataTime=time.time()
     RxThreadRunning=1
     semaphoreStartSynchro.release()
-    while ((readedBytes != inputSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
+    while ((readedBytes != receiveSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
         data = portHandle.read(256);
         # Store data for graphical plot.
         if (args.graph):
@@ -111,7 +119,7 @@ def read():
             plot_RxData.append(readedBytes)
             plot_TxData.append(TxTransmitted)
         # Print trace info
-        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,inputSize,TxTransmitted-readedBytes))
+        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
         sys.stdout.flush()
         if len(data) > 0:
             outFile.write(data)
@@ -123,7 +131,7 @@ def read():
     stopTime=time.time()
     durationTime=stopTime-readStartTime
     outFile.close()
-    sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,inputSize,TxTransmitted-readedBytes))
+    sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
     if (durationTime>60):
         print "\nWhole read transfer time:",str(round(durationTime/60,0)),"m ",str(round(math.fmod(durationTime,60),2)),"s."
     else:
