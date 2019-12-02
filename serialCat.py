@@ -64,6 +64,8 @@ if (args.graph):
 
 # Read input file size
 inputSize = os.stat(args.inputFile).st_size
+if (args.transmitSize):
+    inputSize=args.transmitSize
 
 #Config check
 if (not args.receiveSize):
