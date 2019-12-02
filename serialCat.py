@@ -34,9 +34,8 @@ if (not args.device):
     sys.exit(1)
 
 #Config check
-if (not args.baudrate):
-    defaultBaudrate=115200
-else:
+defaultBaudrate=115200
+if (args.baudrate is not None):
     defaultBaudrate=args.baudrate
 
 #Config check
@@ -51,9 +50,8 @@ else:
         defaultParity=serial.PARITY_NONE
 
 #Config check
-if (not args.frameSize):
-    defaultFrameSize=1024
-else:
+defaultFrameSize=1024
+if (args.frameSize is not None):
     defaultFrameSize=args.frameSize
 
 #Config check
@@ -65,11 +63,11 @@ if (args.graph):
 
 # Read input file size
 inputSize = os.stat(args.inputFile).st_size
-if (args.transmitSize):
+if (args.transmitSize is not None):
     inputSize=args.transmitSize
 
 #Config check
-if (not args.receiveSize):
+if (not args.receiveSize is not None):
     receiveSize=inputSize
 else:
     receiveSize=args.receiveSize
