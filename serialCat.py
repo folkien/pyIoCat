@@ -118,8 +118,11 @@ def read():
             plot_time.append(timeStamp)
             plot_RxData.append(readedBytes)
             plot_TxData.append(TxTransmitted)
-        # Print trace info
-        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
+        # Print Delta only when RxSize is not specified
+        if (inputSize == receiveSize):
+            sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
+        else:
+            sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB." % (TxTransmitted,inputSize,readedBytes,receiveSize))
         sys.stdout.flush()
         if len(data) > 0:
             outFile.write(data)
@@ -131,7 +134,12 @@ def read():
     stopTime=time.time()
     durationTime=stopTime-readStartTime
     outFile.close()
-    sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
+    # Print Delta only when RxSize is not specified
+    if (inputSize == receiveSize):
+        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
+    else:
+        sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB." % (TxTransmitted,inputSize,readedBytes,receiveSize))
+    # Print minutes if time > 60s.
     if (durationTime>60):
         print "\nWhole read transfer time:",str(round(durationTime/60,0)),"m ",str(round(math.fmod(durationTime,60),2)),"s."
     else:
