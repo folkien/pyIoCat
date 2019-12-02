@@ -168,7 +168,7 @@ def main():
     print "Input from ",args.inputFile,"."
     print "InputSize : ",inputSize,"Bytes."
     inFile = open(args.inputFile,'r')
-    for chunk in iter(lambda: inFile.read(defaultFrameSize), ''):
+    for chunk in iter(lambda: inFile.read(min(defaultFrameSize,inputSize-TxTransmitted)), ''):
         writeSize       = portHandle.write(chunk)
         TxTransmitted   += writeSize
         if (args.preview):
