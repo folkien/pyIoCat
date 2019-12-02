@@ -15,6 +15,7 @@ parser.add_argument("-f", "--frameSize", type=int, required=False, help="Size of
 parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size of transmitted total data")
 parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received total data")
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
+parser.add_argument("-p", "--preview", action='store_true', required=False, help="Preview data")
 args = parser.parse_args()
 
 #Assert
@@ -170,6 +171,8 @@ def main():
     for chunk in iter(lambda: inFile.read(defaultFrameSize), ''):
         writeSize       = portHandle.write(chunk)
         TxTransmitted   += writeSize
+        if (args.preview):
+            sys.stdout.write("Tx:%s\n" % (chunk))
         if (RxThreadRunning == 0):
             break;
 
