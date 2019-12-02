@@ -12,7 +12,7 @@ parser.add_argument("-d", "--device", type=str, required=True, help="tty Device"
 parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
 parser.add_argument("-P", "--parity", type=str, required=False, help="")
 parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size of transmited frame")
-parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received frame")
+parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received total data")
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
 args = parser.parse_args()
 
@@ -110,7 +110,7 @@ def read():
     lastDataTime=time.time()
     RxThreadRunning=1
     semaphoreStartSynchro.release()
-    while ((readedBytes != receiveSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
+    while ((readedBytes < receiveSize) and ((time.time() - lastDataTime) < maxNoDataTime)):
         data = portHandle.read(256);
         # Store data for graphical plot.
         if (args.graph):
