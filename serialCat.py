@@ -12,6 +12,7 @@ parser.add_argument("-d", "--device", type=str, required=True, help="tty Device"
 parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
 parser.add_argument("-P", "--parity", type=str, required=False, help="")
 parser.add_argument("-f", "--frameSize", type=int, required=False, help="Size of transmited frame")
+parser.add_argument("-fd", "--frameDelay", type=float, required=False, help="Delay of transmited frame in seconds (float)")
 parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size of transmitted total data")
 parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received total data")
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
@@ -171,6 +172,8 @@ def main():
         TxTransmitted   += writeSize
         if (args.preview):
             sys.stdout.write("Tx:%s\n" % (chunk))
+        if (args.frameDelay is not None):
+            time.sleep(args.frameDelay)
         if (RxThreadRunning == 0):
             break;
 
