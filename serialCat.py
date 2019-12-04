@@ -18,6 +18,7 @@ parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size
 parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received total data")
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
 parser.add_argument("-p", "--preview", action='store_true', required=False, help="Preview data")
+parser.add_argument("-pdp", "--processDataPath", type=str, required=False, help="Path to module called ProcessData.py")
 args = parser.parse_args()
 
 #Assert
@@ -34,6 +35,11 @@ if (not args.outputFile):
 if (not args.device):
     print "No device"
     sys.exit(1)
+
+# Add the directory and module
+if (args.processDataPath is not None):
+    sys.path.append(os.path.abspath(args.processDataPath))
+    from ProcessData import processData
 
 #Config check
 defaultBaudrate=115200
@@ -130,9 +136,12 @@ def read():
             sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB." % (TxTransmitted,inputSize,readedBytes,receiveSize))
         sys.stdout.flush()
         if len(data) > 0:
-            outFile.write(data)
             readedBytes+=len(data)
             lastDataTime=time.time()
+            # Added possiblity to process data before write to file
+            if (args.processDataPath is not None):
+                data = processData(data)
+            outFile.write(data)
         else:
             print "\nNo data time",(time.time() - lastDataTime),"s."
 
