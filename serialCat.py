@@ -8,6 +8,7 @@ import math
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--inputFile", type=str, required=True, help="input file")
 parser.add_argument("-o", "--outputFile", type=str, required=True, help="output file")
+parser.add_argument("-a", "--appendOutputFile", action='store_true', required=False, help="Appen output file instead of create and write")
 parser.add_argument("-d", "--device", type=str, required=True, help="tty Device")
 parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
 parser.add_argument("-P", "--parity", type=str, required=False, help="")
@@ -113,7 +114,10 @@ def read():
         global plot_RxData
         global plot_TxData
     print "Output to ",args.outputFile,"."
-    outFile = open(args.outputFile,'w')
+    if (args.appendOutputFile is not None):
+        outFile = open(args.outputFile,'w+')
+    else:
+        outFile = open(args.outputFile,'w')
     readedBytes=0;
     maxNoDataTime=5 #[s]
     readStartTime=time.time()
