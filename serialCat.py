@@ -115,7 +115,7 @@ def read():
         global plot_TxData
     print "Output to ",args.outputFile,"."
     if (args.appendOutputFile is not None):
-        outFile = open(args.outputFile,'w+')
+        outFile = open(args.outputFile,'a+')
     else:
         outFile = open(args.outputFile,'w')
     readedBytes=0;
