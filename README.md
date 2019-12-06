@@ -2,21 +2,27 @@
 This script takes serial port device, input file and output file as an arguments and then sent input file content to serial port and reads simultanously (Amount of bytes equal to input file size) to output file. If everything is readen or 5s of no data happend then script closes port and exits.
 
 ```shell
-usage: serialCat.py [-h] -i INPUTFILE -o OUTPUTFILE -d DEVICE [-B BAUDRATE]
-                    [-P PARITY] [-f FRAMESIZE] [-fd FRAMEDELAY]
-                    [-rd RECEIVEDELAY] [-t TRANSMITSIZE] [-r RECEIVESIZE] [-g]
-                    [-p]
+usage: serialCat [-h] [-i INPUTFILE] [-o OUTPUTFILE] [-a] -d DEVICE
+                 [-B BAUDRATE] [-P PARITY] [-F FLOWCONTROL] [-f FRAMESIZE]
+                 [-fd FRAMEDELAY] [-rd RECEIVEDELAY] [-t TRANSMITSIZE]
+                 [-r RECEIVESIZE] [-c] [-g] [-p] [-pdp PROCESSDATAPATH]
 
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUTFILE, --inputFile INPUTFILE
-                        input file
+                        Input file to sent
   -o OUTPUTFILE, --outputFile OUTPUTFILE
-                        output file
+                        Output file where received data is stored
+  -a, --appendOutputFile
+                        Append output file instead of create and write
   -d DEVICE, --device DEVICE
-                        tty Device
+                        Path of tty device
   -B BAUDRATE, --baudrate BAUDRATE
+                        Int value of baudrate
   -P PARITY, --parity PARITY
+                        Parity <none | even | odd>
+  -F FLOWCONTROL, --flowcontrol FLOWCONTROL
+                        Flowcontrol <none | rtscts >
   -f FRAMESIZE, --frameSize FRAMESIZE
                         Size of transmited frame
   -fd FRAMEDELAY, --frameDelay FRAMEDELAY
@@ -28,8 +34,11 @@ optional arguments:
                         Size of transmitted total data
   -r RECEIVESIZE, --receiveSize RECEIVESIZE
                         Size of received total data
+  -c, --check           Checks if input file is equal to output file.
   -g, --graph           Transfer graph plot
   -p, --preview         Preview data
+  -pdp PROCESSDATAPATH, --processDataPath PROCESSDATAPATH
+                        Path to module called ProcessData.py
 ```
 
 # Examples
