@@ -31,3 +31,30 @@ optional arguments:
   -g, --graph           Transfer graph plot
   -p, --preview         Preview data
 ```
+
+# Examples
+
+Transfer file `a.txt` and receive identicall amount of bytes to file `b.txt` through `/dev/ttyACM0`.
+
+```shell
+serialCat -d /dev/ttyACM0 -i a.txt  -o b.txt
+```
+
+Do this same but also compare output and input MD5 sums and throw -1 exit code if diffrent.
+
+```shell
+serialCat -d /dev/ttyACM0 -i a.txt  -o b.txt -c
+```
+
+Transfer only `a.txt` file in parts max 100 bytes with in between time delay 100ms
+
+```shell
+serialCat -d /dev/ttyACM0 -i a.txt -f 100 -fd 0.1
+```
+
+Read only 10000 Bytes from serial port to file and plot speed graph.
+
+```shell
+serialCat -d /dev/ttyACM0 -o b.txt -r 10000 -g
+```
+
