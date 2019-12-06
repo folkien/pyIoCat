@@ -112,32 +112,41 @@ def read():
     global RxThreadRunning
     global TxTransmitted
     global receiveSize
+
     #Declare globals for plot
     if (args.graph):
         global plot_time
         global plot_RxData
         global plot_TxData
-    print "Output to ",args.outputFile,"."
+
+    # If output file not defined then release semaphore and return
+    if (args.outputFile is None):
+        semaphoreStartSynchro.release()
+        return
+
     # Open output file to append or write clear
+    print "Output to ",args.outputFile,"."
     if (args.appendOutputFile is not None):
         outFile = open(args.outputFile,'a+')
     else:
         outFile = open(args.outputFile,'w')
+
     readedBytes=0;
     maxNoDataTime=5 #[s]
-    readStartTime=time.time()
-    lastDataTime=time.time()
+    lastDataTime=readStartTime=time.time()
     RxThreadRunning=1
     semaphoreStartSynchro.release()
     while ( (args.receiveDelay is None) and ((readedBytes < receiveSize) and ((time.time() - lastDataTime) < maxNoDataTime)) or
            (args.receiveDelay is not None) and ((time.time() - lastDataTime) < args.receiveDelay)):
         data = portHandle.read(256);
+
         # Store data for graphical plot.
         if (args.graph):
             timeStamp=time.time()
             plot_time.append(timeStamp)
             plot_RxData.append(readedBytes)
             plot_TxData.append(TxTransmitted)
+
         # Print Delta only when RxSize is not specified
         if (inputSize == receiveSize):
             sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
@@ -187,7 +196,7 @@ def main():
     # If input file defined
     if (args.inputFile is not None):
         # Open write file and send lines
-        print "Input from ",args.inputFile," (",inputSize," Bytes)."
+        print "Input from ",args.inputFile,"(",inputSize,"Bytes)."
         inFile = open(args.inputFile,'r')
         for chunk in iter(lambda: inFile.read(min(defaultFrameSize,inputSize-TxTransmitted)), ''):
             writeSize       = portHandle.write(chunk)
