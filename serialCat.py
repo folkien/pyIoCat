@@ -202,8 +202,13 @@ def main():
 
     #Plot graph if needed
     if (args.graph):
-        plt.plot(plot_time,plot_TxData,label="TxData")
-        plt.plot(plot_time,plot_RxData,label="RxData")
+        plt.plot(plot_time,plot_TxData,label="Tx")
+        plt.plot(plot_time,plot_RxData,label="Rx")
+        plt.title("Transmission graph (Bytes/Time)")
+        plt.xlabel("Time [s]")
+        plt.ylabel("Data sent/received [B]")
+        plt.legend(loc="upper left")
+        plt.grid(True)
         plt.show()
 
 # Call main
