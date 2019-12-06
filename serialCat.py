@@ -114,6 +114,7 @@ def read():
         global plot_RxData
         global plot_TxData
     print "Output to ",args.outputFile,"."
+    # Open output file to append or write clear
     if (args.appendOutputFile is not None):
         outFile = open(args.outputFile,'a+')
     else:
@@ -179,14 +180,15 @@ def main():
     semaphoreStartSynchro.acquire()
 
     # Open write file and send lines
-    print "Input from ",args.inputFile,"."
-    print "InputSize : ",inputSize,"Bytes."
+    print "Input from ",args.inputFile," (",inputSize," Bytes)."
     inFile = open(args.inputFile,'r')
     for chunk in iter(lambda: inFile.read(min(defaultFrameSize,inputSize-TxTransmitted)), ''):
         writeSize       = portHandle.write(chunk)
         TxTransmitted   += writeSize
+        # Transmitted data preview if set
         if (args.preview):
             sys.stdout.write("Tx:%s\n" % (chunk))
+        # Wait frame delay if set
         if (args.frameDelay is not None):
             time.sleep(args.frameDelay)
         if (RxThreadRunning == 0):
