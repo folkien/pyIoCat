@@ -4,6 +4,10 @@ import threading
 import time
 import serial
 import math
+import hashlib
+
+# Program result return at then end of main
+result=0
 
 parser = argparse.ArgumentParser()
 # File options
@@ -22,6 +26,7 @@ parser.add_argument("-rd", "--receiveDelay", type=float, required=False, help="E
 parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size of transmitted total data")
 parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received total data")
 # Extra options
+parser.add_argument("-c", "--check", action='store_true', required=False, help="Checks if input file is equal to output file.")
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
 parser.add_argument("-p", "--preview", action='store_true', required=False, help="Preview data")
 parser.add_argument("-pdp", "--processDataPath", type=str, required=False, help="Path to module called ProcessData.py")
@@ -107,8 +112,16 @@ print "Port ",args.device," opened."
 RxThreadRunning=0
 TxTransmitted=0
 
+def FileMD5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
 # Reading thread
 def read():
+    global result
     global RxThreadRunning
     global TxTransmitted
     global receiveSize
@@ -183,6 +196,7 @@ def read():
 
 # Writing thread
 def main():
+    global result
     global RxThreadRunning
     global TxTransmitted
     # Read thread creation
@@ -216,6 +230,16 @@ def main():
     print "Port ",args.device," closed."
     portHandle.close()
 
+    # Check files md5 sums if enabled
+    if ((args.check) and (args.inputFile is not None) and (args.outputFile is not None)):
+        sumInput=FileMD5(args.inputFile)
+        sumOutput=FileMD5(args.outputFile)
+        sys.stdout.write("Input file MD5 %s\n" % sumInput)
+        sys.stdout.write("Output file MD5 %s\n" % sumOutput)
+        if (sumInput != sumOutput):
+            sys.stdout.write("Checksum error!\n")
+            result=-1
+
     #Plot graph if needed
     if (args.graph):
         plt.plot(plot_time,plot_TxData,label="Tx")
@@ -229,3 +253,4 @@ def main():
 
 # Call main
 main()
+sys.exit(result)
