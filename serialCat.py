@@ -6,32 +6,26 @@ import serial
 import math
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--inputFile", type=str, required=True, help="Input file to sent")
-parser.add_argument("-o", "--outputFile", type=str, required=True, help="Output file where received data is stored")
+# File options
+parser.add_argument("-i", "--inputFile", type=str, required=False, help="Input file to sent")
+parser.add_argument("-o", "--outputFile", type=str, required=False, help="Output file where received data is stored")
 parser.add_argument("-a", "--appendOutputFile", action='store_true', required=False, help="Append output file instead of create and write")
+# Serial communication options
 parser.add_argument("-d", "--device", type=str, required=True, help="Path of tty device")
 parser.add_argument("-B", "--baudrate", type=int, required=False, help="Int value of baudrate")
 parser.add_argument("-P", "--parity", type=str, required=False, help="Parity <none | even | odd>")
 parser.add_argument("-F", "--flowcontrol", type=str, required=False, help="Flowcontrol <none | rtscts >")
+# General communication options
 parser.add_argument("-f", "--frameSize", type=int, required=False, help="Size of transmited frame")
 parser.add_argument("-fd", "--frameDelay", type=float, required=False, help="Delay of transmited frame in seconds (float)")
 parser.add_argument("-rd", "--receiveDelay", type=float, required=False, help="Extra receive delay of transmited frame in seconds (float)")
 parser.add_argument("-t", "--transmitSize", type=int, required=False, help="Size of transmitted total data")
 parser.add_argument("-r", "--receiveSize", type=int, required=False, help="Size of received total data")
+# Extra options
 parser.add_argument("-g", "--graph", action='store_true', required=False, help="Transfer graph plot")
 parser.add_argument("-p", "--preview", action='store_true', required=False, help="Preview data")
 parser.add_argument("-pdp", "--processDataPath", type=str, required=False, help="Path to module called ProcessData.py")
 args = parser.parse_args()
-
-#Assert
-if (not args.inputFile):
-    print "No input"
-    sys.exit(1)
-
-#Assert
-if (not args.outputFile):
-    print "No output"
-    sys.exit(1)
 
 #Assert
 if (not args.device):
@@ -49,9 +43,8 @@ if (args.baudrate is not None):
     defaultBaudrate=args.baudrate
 
 #Config check
-if (not args.parity):
-    defaultParity=serial.PARITY_EVEN
-else:
+defaultParity=serial.PARITY_EVEN
+if (args.parity is not None):
     if args.parity == "even":
         defaultParity=serial.PARITY_EVEN
     elif args.parity == "odd":
@@ -60,9 +53,8 @@ else:
         defaultParity=serial.PARITY_NONE
 
 #Config check
-if (args.flowcontrol is None):
-    confRtsCts=True
-else:
+confRtsCts=True
+if (args.flowcontrol is not None):
     if args.flowcontrol == "rtscts":
         confRtsCts=True
     else:
@@ -81,7 +73,9 @@ if (args.graph):
     plot_TxData = []
 
 # Read input file size
-inputSize = os.stat(args.inputFile).st_size
+inputSize=0
+if (args.inputFile is not None):
+    inputSize = os.stat(args.inputFile).st_size
 if (args.transmitSize is not None):
     inputSize=args.transmitSize
 
@@ -163,6 +157,7 @@ def read():
     stopTime=time.time()
     durationTime=stopTime-readStartTime
     outFile.close()
+
     # Print Delta only when RxSize is not specified
     if (inputSize == receiveSize):
         sys.stdout.write("\rTransmitted %d/%dB. Readed %d/%dB. Delta = %dB.  " % (TxTransmitted,inputSize,readedBytes,receiveSize,TxTransmitted-readedBytes))
@@ -189,20 +184,22 @@ def main():
     # Wait on start synchronization semaphore
     semaphoreStartSynchro.acquire()
 
-    # Open write file and send lines
-    print "Input from ",args.inputFile," (",inputSize," Bytes)."
-    inFile = open(args.inputFile,'r')
-    for chunk in iter(lambda: inFile.read(min(defaultFrameSize,inputSize-TxTransmitted)), ''):
-        writeSize       = portHandle.write(chunk)
-        TxTransmitted   += writeSize
-        # Transmitted data preview if set
-        if (args.preview):
-            sys.stdout.write("Tx:%s\n" % (chunk))
-        # Wait frame delay if set
-        if (args.frameDelay is not None):
-            time.sleep(args.frameDelay)
-        if (RxThreadRunning == 0):
-            break;
+    # If input file defined
+    if (args.inputFile is not None):
+        # Open write file and send lines
+        print "Input from ",args.inputFile," (",inputSize," Bytes)."
+        inFile = open(args.inputFile,'r')
+        for chunk in iter(lambda: inFile.read(min(defaultFrameSize,inputSize-TxTransmitted)), ''):
+            writeSize       = portHandle.write(chunk)
+            TxTransmitted   += writeSize
+            # Transmitted data preview if set
+            if (args.preview):
+                sys.stdout.write("Tx:%s\n" % (chunk))
+            # Wait frame delay if set
+            if (args.frameDelay is not None):
+                time.sleep(args.frameDelay)
+            if (RxThreadRunning == 0):
+                break;
 
 
     # Wait on reading thread and close port
