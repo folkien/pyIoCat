@@ -6,12 +6,13 @@ import serial
 import math
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--inputFile", type=str, required=True, help="input file")
-parser.add_argument("-o", "--outputFile", type=str, required=True, help="output file")
-parser.add_argument("-a", "--appendOutputFile", action='store_true', required=False, help="Appen output file instead of create and write")
-parser.add_argument("-d", "--device", type=str, required=True, help="tty Device")
-parser.add_argument("-B", "--baudrate", type=int, required=False, help="")
-parser.add_argument("-P", "--parity", type=str, required=False, help="")
+parser.add_argument("-i", "--inputFile", type=str, required=True, help="Input file to sent")
+parser.add_argument("-o", "--outputFile", type=str, required=True, help="Output file where received data is stored")
+parser.add_argument("-a", "--appendOutputFile", action='store_true', required=False, help="Append output file instead of create and write")
+parser.add_argument("-d", "--device", type=str, required=True, help="Path of tty device")
+parser.add_argument("-B", "--baudrate", type=int, required=False, help="Int value of baudrate")
+parser.add_argument("-P", "--parity", type=str, required=False, help="Parity <none | even | odd>")
+parser.add_argument("-F", "--flowcontrol", type=str, required=False, help="Flowcontrol <none | rtscts >")
 parser.add_argument("-f", "--frameSize", type=int, required=False, help="Size of transmited frame")
 parser.add_argument("-fd", "--frameDelay", type=float, required=False, help="Delay of transmited frame in seconds (float)")
 parser.add_argument("-rd", "--receiveDelay", type=float, required=False, help="Extra receive delay of transmited frame in seconds (float)")
@@ -59,6 +60,15 @@ else:
         defaultParity=serial.PARITY_NONE
 
 #Config check
+if (args.flowcontrol is None):
+    confRtsCts=True
+else:
+    if args.flowcontrol == "rtscts":
+        confRtsCts=True
+    else:
+        confRtsCts=False
+
+#Config check
 defaultFrameSize=1024
 if (args.frameSize is not None):
     defaultFrameSize=args.frameSize
@@ -87,7 +97,7 @@ semaphoreStartSynchro = threading.Semaphore()
 portHandle = serial.Serial(
     port=args.device,
     baudrate=defaultBaudrate,
-    rtscts=True,
+    rtscts=confRtsCts,
     parity=defaultParity,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
