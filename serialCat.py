@@ -112,6 +112,7 @@ print "Port ",args.device," opened."
 RxThreadRunning=0
 TxTransmitted=0
 
+# MD5 of file ( only path given as argument )
 def FileMD5(fname):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
