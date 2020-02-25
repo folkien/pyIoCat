@@ -224,6 +224,7 @@ def main():
                 time.sleep(args.frameDelay)
             if (RxThreadRunning == 0):
                 break;
+        time.sleep(0.005)
 
 
     # Wait on reading thread and close port
