@@ -140,7 +140,7 @@ def read():
 
     # Open output file to append or write clear
     print "Output to ",args.outputFile,"."
-    if (args.appendOutputFile is not None):
+    if (args.appendOutputFile):
         outFile = open(args.outputFile,'a+')
     else:
         outFile = open(args.outputFile,'w')
